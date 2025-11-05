@@ -809,8 +809,7 @@ export default function Home() {
       )}
 
       <footer className="mt-8 mb-12 text-center text-xs text-slate-500">
-        Built with 💖 by your Super Mom Bestie — tweak anything you like & hit
-        Print.
+        Built with 💖 Adia and her AI Bestie
       </footer>
     </div>
   );
