@@ -23,7 +23,16 @@ function Section({
   );
 }
 
-type TabKey = "tips" | "food" | "daytime" | "hotels" | "gallery" | "notes";
+type TabKey =
+  | "tips"
+  | "food"
+  | "daytime"
+  | "hotels"
+  | "itinerary"
+  | "trivia"
+  | "map"
+  | "gallery"
+  | "notes";
 
 /* ---------- Data: Food & Experiences ---------- */
 
@@ -120,9 +129,75 @@ const hotels = [
     maps: "https://www.google.com/maps/place/Patios+de+San+Telmo/",
     notes:
       "Boutique hotel with a leafy courtyard, small pool, and restored colonial vibe. Perfect for exploring San Telmo’s cobblestone streets and cafés.",
-    nights: "Nov 4–5 (1 night)",
+    nights: "San Telmo — first night in BA",
   },
-  // Add more hotel stays here later if you want
+  // You can add Recoleta / Palermo hotels here later
+];
+
+/* ---------- Data: Itinerary (Wed–Tue) ---------- */
+
+type ItineraryItem = {
+  id: string;
+  title: string;
+  details: string;
+};
+
+const itineraryDefault: ItineraryItem[] = [
+  {
+    id: "wed",
+    title: "Wednesday – Arrival in San Telmo",
+    details:
+      "Arrive in Buenos Aires ✈️ (Ezeiza). Uber to Patios de San Telmo. Drop bags, relax, wander cobblestone streets, Plaza Dorrego, and find a cozy bar or local parrilla for dinner.",
+  },
+  {
+    id: "thu",
+    title: "Thursday – Uruguay: Colonia & Montevideo",
+    details:
+      "Morning ferry to Colonia del Sacramento 🇺🇾. Explore the old town, lighthouse, cafés. Afternoon bus to Montevideo to stay with your friend — dinner and catching up.",
+  },
+  {
+    id: "fri",
+    title: "Friday – Back to BA & Recoleta",
+    details:
+      "Travel back to Buenos Aires. Check into your Recoleta stay. Visit Recoleta Cemetery, stroll the neighborhood, and try a vermouth at La Vermutería. Easy dinner nearby.",
+  },
+  {
+    id: "sat",
+    title: "Saturday – Recoleta & Parks",
+    details:
+      "Slow morning with medialunas 🥐. Explore markets (Recoleta or San Telmo), then head to El Rosedal and nearby parks. Optional Planetarium in the evening.",
+  },
+  {
+    id: "sun",
+    title: "Sunday – Tigre Delta & Move to Palermo",
+    details:
+      "Day trip to Tigre Delta 🛶 for a boat ride and riverside lunch. Return to BA, move to your Palermo stay for Sunday night. Evening drinks or dessert in Palermo Soho.",
+  },
+  {
+    id: "mon",
+    title: "Monday – Palermo Day",
+    details:
+      "Full Palermo day: coffee, pastries, leather shopping, street art, and parks. Dinner at La Cabrera or another parrilla, dessert at Rapanui or Cremolatti.",
+  },
+  {
+    id: "tue",
+    title: "Tuesday – Last Sips & Fly Home",
+    details:
+      "Final coffee and medialuna, pick up last-minute gifts, and head to the airport ✈️. Back to the real world — with lots of photos and inside jokes.",
+  },
+];
+
+/* ---------- Data: Trivia ---------- */
+
+const triviaFacts = [
+  "Buenos Aires is often called the 'Paris of South America' because of its European-style architecture and café culture.",
+  "Argentina is the birthplace of tango — it started in working-class neighborhoods like San Telmo and La Boca in the late 1800s.",
+  "Argentines are among the biggest beef eaters in the world per person.",
+  "Dulce de leche is basically a national religion — it shows up in cakes, pastries, ice cream, and more.",
+  "Sharing mate (herbal tea) is a social ritual. People carry a thermos and a gourd and pass it around in a circle.",
+  "Buenos Aires has one of the highest numbers of bookstores per person of any city in the world.",
+  "Recoleta Cemetery is one of the most famous in the world — Eva Perón (Evita) is buried there.",
+  "The Tigre Delta is one of the few major deltas that empties into another river (Río de la Plata), not directly into the sea.",
 ];
 
 /* ---------- Daily messages template ---------- */
@@ -180,6 +255,32 @@ export default function Home() {
     dailyMessages.find((m) => m.date === todayStr)?.text ||
     "Love you always 💖";
 
+  // Itinerary editing
+  const [itinerary, setItinerary] = useState<ItineraryItem[]>(itineraryDefault);
+  const [editingItinerary, setEditingItinerary] = useState(false);
+  const [newDayTitle, setNewDayTitle] = useState("");
+  const [newDayDetails, setNewDayDetails] = useState("");
+
+  const addItineraryDay = () => {
+    if (!newDayTitle.trim() || !newDayDetails.trim()) return;
+    setItinerary((prev) => [
+      ...prev,
+      {
+        id: `custom-${Date.now()}`,
+        title: newDayTitle.trim(),
+        details: newDayDetails.trim(),
+      },
+    ]);
+    setNewDayTitle("");
+    setNewDayDetails("");
+  };
+
+  const resetItinerary = () => {
+    setItinerary(itineraryDefault);
+    setNewDayTitle("");
+    setNewDayDetails("");
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-6 bg-slate-50 min-h-screen">
       {/* Tabs header */}
@@ -189,8 +290,11 @@ export default function Home() {
           { key: "food", label: "Food & Drinks 🍽️" },
           { key: "daytime", label: "Daytime Adventures 🌞" },
           { key: "hotels", label: "Hotels 🏨" },
+          { key: "itinerary", label: "Itinerary 📅" },
+          { key: "trivia", label: "Trivia 🇦🇷" },
+          { key: "map", label: "Map 🗺️" },
           { key: "gallery", label: "Trip Gallery 📸" },
-          { key: "notes", label: "A Note for Eric 💌" },
+          { key: "notes", label: "Messages 💌" },
         ].map((tab) => (
           <button
             key={tab.key}
@@ -282,9 +386,7 @@ export default function Home() {
                   key={r.name}
                   className="p-3 border rounded-2xl bg-white/90 shadow-sm"
                 >
-                  <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <h3 className="font-semibold">{r.name}</h3>
-                  </div>
+                  <h3 className="font-semibold mb-1">{r.name}</h3>
                   <p className="text-slate-700">
                     <span className="font-medium">Address:</span> {r.addr}
                   </p>
@@ -421,6 +523,163 @@ export default function Home() {
         </Section>
       )}
 
+      {/* ---------- Itinerary tab ---------- */}
+      {active === "itinerary" && (
+        <Section title="Trip Itinerary" emoji="📅">
+          <div className="flex flex-wrap gap-2 mb-3 text-sm">
+            <button
+              className="px-3 py-2 rounded-xl border hover:bg-slate-50"
+              onClick={() => setEditingItinerary((v) => !v)}
+            >
+              {editingItinerary ? "Done Editing" : "Edit Itinerary"}
+            </button>
+            <button
+              className="px-3 py-2 rounded-xl bg-pink-600 text-white hover:bg-pink-700"
+              onClick={resetItinerary}
+            >
+              Reset to Default
+            </button>
+          </div>
+
+          <div className="space-y-3 text-sm text-slate-800">
+            {itinerary.map((item, idx) => (
+              <div
+                key={item.id}
+                className="p-3 border rounded-2xl bg-white/90 shadow-sm"
+              >
+                {editingItinerary ? (
+                  <>
+                    <input
+                      value={item.title}
+                      onChange={(e) =>
+                        setItinerary((prev) =>
+                          prev.map((x, i) =>
+                            i === idx ? { ...x, title: e.target.value } : x
+                          )
+                        )
+                      }
+                      className="w-full mb-2 rounded-xl border px-2 py-1 text-sm font-semibold"
+                    />
+                    <textarea
+                      value={item.details}
+                      onChange={(e) =>
+                        setItinerary((prev) =>
+                          prev.map((x, i) =>
+                            i === idx ? { ...x, details: e.target.value } : x
+                          )
+                        )
+                      }
+                      className="w-full min-h-[80px] rounded-xl border p-2 text-sm"
+                    />
+                  </>
+                ) : (
+                  <>
+                    <h3 className="font-semibold mb-1">{item.title}</h3>
+                    <p className="text-slate-700">{item.details}</p>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {editingItinerary && (
+            <div className="mt-4 p-3 border rounded-2xl bg-white/90 space-y-2 text-sm">
+              <h3 className="font-semibold">Add New Day</h3>
+              <input
+                value={newDayTitle}
+                onChange={(e) => setNewDayTitle(e.target.value)}
+                placeholder="Day title (e.g., Bonus Day in Palermo)"
+                className="w-full rounded-xl border px-2 py-1 text-sm"
+              />
+              <textarea
+                value={newDayDetails}
+                onChange={(e) => setNewDayDetails(e.target.value)}
+                placeholder="Plans for this day..."
+                className="w-full min-h-[80px] rounded-xl border p-2 text-sm"
+              />
+              <div className="flex gap-2">
+                <button
+                  className="px-3 py-2 rounded-xl bg-pink-600 text-white text-sm hover:bg-pink-700"
+                  onClick={addItineraryDay}
+                >
+                  Add Day
+                </button>
+                <button
+                  className="px-3 py-2 rounded-xl border text-sm hover:bg-slate-50"
+                  onClick={() => {
+                    setNewDayTitle("");
+                    setNewDayDetails("");
+                  }}
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+          )}
+        </Section>
+      )}
+
+      {/* ---------- Trivia tab ---------- */}
+      {active === "trivia" && (
+        <Section title="Argentina Trivia" emoji="🇦🇷">
+          <ul className="list-disc pl-5 space-y-2 text-sm text-slate-700">
+            {triviaFacts.map((fact, i) => (
+              <li key={i}>{fact}</li>
+            ))}
+          </ul>
+        </Section>
+      )}
+
+      {/* ---------- Map tab ---------- */}
+      {active === "map" && (
+        <Section title="Neighborhood Maps" emoji="🗺️">
+          <p className="text-sm text-slate-600 mb-3">
+            Zoom and drag around to get your bearings in{" "}
+            <strong>San Telmo</strong> (first night),{" "}
+            <strong>Recoleta</strong> (Fri–Sun), and{" "}
+            <strong>Palermo</strong> (Sun night–Tue).
+          </p>
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-semibold text-sm mb-1">San Telmo</h3>
+              <div className="overflow-hidden rounded-2xl border">
+                <iframe
+                  title="San Telmo map"
+                  src="https://www.google.com/maps?q=San+Telmo+Buenos+Aires&output=embed"
+                  width="100%"
+                  height="220"
+                  loading="lazy"
+                ></iframe>
+              </div>
+            </div>
+            <div>
+              <h3 className="font-semibold text-sm mb-1">Recoleta</h3>
+              <div className="overflow-hidden rounded-2xl border">
+                <iframe
+                  title="Recoleta map"
+                  src="https://www.google.com/maps?q=Recoleta+Buenos+Aires&output=embed"
+                  width="100%"
+                  height="220"
+                  loading="lazy"
+                ></iframe>
+              </div>
+            </div>
+            <div>
+              <h3 className="font-semibold text-sm mb-1">Palermo Soho</h3>
+              <div className="overflow-hidden rounded-2xl border">
+                <iframe
+                  title="Palermo Soho map"
+                  src="https://www.google.com/maps?q=Palermo+Soho+Buenos+Aires&output=embed"
+                  width="100%"
+                  height="220"
+                  loading="lazy"
+                ></iframe>
+              </div>
+            </div>
+          </div>
+        </Section>
+      )}
+
       {/* ---------- Trip Gallery tab ---------- */}
       {active === "gallery" && (
         <Section title="Trip Gallery (Paste Links)" emoji="📸">
@@ -470,9 +729,9 @@ export default function Home() {
         </Section>
       )}
 
-      {/* ---------- Daily Note tab ---------- */}
+      {/* ---------- Messages tab ---------- */}
       {active === "notes" && (
-        <Section title="A Note for Eric (Daily)" emoji="💌">
+        <Section title="Messages for Eric" emoji="💌">
           <p className="text-sm text-slate-600 mb-2">
             Today: <span className="font-mono">{todayStr}</span>
           </p>
@@ -485,7 +744,7 @@ export default function Home() {
               className="px-3 py-2 rounded-xl border text-sm hover:bg-slate-50"
               onClick={() => setEditingNotes((v) => !v)}
             >
-              {editingNotes ? "Close Editor" : "Edit Notes"}
+              {editingNotes ? "Close Editor" : "Edit All Messages"}
             </button>
             <button
               className="px-3 py-2 rounded-xl bg-pink-600 text-white text-sm hover:bg-pink-700"
@@ -496,7 +755,7 @@ export default function Home() {
           </div>
 
           {editingNotes && (
-            <div className="mt-2 space-y-3">
+            <div className="mt-2 space-y-3 mb-4">
               {dailyMessages.map((m, i) => (
                 <div
                   key={m.date}
@@ -527,6 +786,25 @@ export default function Home() {
               ))}
             </div>
           )}
+
+          <div className="mt-4">
+            <h3 className="font-semibold text-sm mb-2">
+              All Messages (Eric can scroll back anytime)
+            </h3>
+            <div className="space-y-2 text-sm text-slate-800">
+              {dailyMessages.map((m) => (
+                <div
+                  key={m.date}
+                  className="p-2 rounded-xl border bg-white/90 flex flex-col gap-1"
+                >
+                  <span className="text-xs font-mono text-slate-500">
+                    {m.date}
+                  </span>
+                  <span>{m.text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </Section>
       )}
 
